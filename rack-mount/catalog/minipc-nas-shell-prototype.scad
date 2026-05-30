@@ -121,6 +121,9 @@ carrierScrewStrapW = 18;
 carrierRootRibW = 5;
 carrierRootRibH = 8;
 carrierSideTieH = 6;
+carrierRearLegTieW = 12;
+carrierRearLegTieH = carrierBaseH;
+carrierRearLegTieOverlap = 1.5;
 carrierOuterCornerR = 4;
 carrierPanelEdgeR = 2.5;
 carrierFaceVentSlotW = hddSlotGap + driveBayClearX - 1.5;
@@ -450,7 +453,16 @@ module baseLegConnectorPlugs() {
 module baseCarrierConnectorPlugs() {
   for (p = carrierMountCenters()) {
     translate(v=[p[0] - connectorRectWidth/2, p[1] - connectorRectDepth/2, baseT])
+    clippedStackConnectorPlug(height=carrierMountFootH);
+  }
+}
+
+module clippedStackConnectorPlug(height) {
+  intersection() {
     stackConnectorPlug();
+
+    translate(v=[-1, -1, -1])
+    cube(size=[connectorRectWidth + 2, connectorRectDepth + 2, height + 1]);
   }
 }
 
@@ -640,6 +652,7 @@ module nasShellDriveSled() {
       driveCarrierPanels();
       driveCarrierLaneGuides();
       driveCarrierBaseRails();
+      driveCarrierRearLegTies();
       driveCarrierMountFeet();
       driveCarrierSideScrewBosses();
     }
@@ -713,6 +726,22 @@ module driveCarrierBaseRails() {
   for (i = [0:hddCount - 1]) {
     translate(v=[carrierSlotX(i) - carrierRootRibW/2, 0, 0])
     roundedPlateXY(width=carrierRootRibW, depth=carrierInsertD, height=carrierRootRibH, r=1.5);
+  }
+}
+
+module driveCarrierRearLegTies() {
+  tieD = carrierRearLegTieDepth();
+
+  if (tieD > 0) {
+    for (x = carrierRearLegTieXs()) {
+      translate(v=[x, carrierInsertD - carrierRearLegTieOverlap, 0])
+      roundedPlateXY(
+        width=carrierRearLegTieW,
+        depth=tieD,
+        height=carrierRearLegTieH,
+        r=2
+      );
+    }
   }
 }
 
@@ -1254,6 +1283,14 @@ function carrierMountLocalCenters() = [
   [carrierMountInsetX, carrierInsertD - carrierMountInsetY],
   [carrierInsertW - carrierMountInsetX, carrierInsertD - carrierMountInsetY]
 ];
+
+function carrierRearLegTieXs() = [
+  tableLegW - carrierInsertX0(),
+  outerW - tableLegW - carrierInsertX0() - carrierRearLegTieW
+];
+
+function carrierRearLegTieDepth() =
+  max(0, outerD - tableLegD - carrierInsertY0() - carrierInsertD + carrierRearLegTieOverlap);
 
 function fanScrewCenters() = [
   [fanCenterX - fan120HoleSpacing/2, fanCenterZ - fan120HoleSpacing/2],
