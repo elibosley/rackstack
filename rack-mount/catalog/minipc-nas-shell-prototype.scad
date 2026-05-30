@@ -94,7 +94,7 @@ tpuSpacerT = 1.6;
 carrierDriveGapY = tpuSpacerT;
 hddConnectorKeepoutY0 =
   carrierRailT + carrierDriveGapY + drive35_sata_connector_keepout_offset_from_side();
-carrierSideMargin = 6;
+carrierSideMargin = 8;
 driveRailW = 20;
 driveRailT = 3.2;
 driveRailChannelClear = 0.6;
@@ -107,7 +107,7 @@ carrierInsertW = hddBankW + 2*carrierSideMargin;
 carrierInsertD = hddD + 2*driveRailT + 2*carrierDriveGapY;
 carrierInsertH = hddL;
 carrierBaseH = 8;
-carrierEndPostW = 6;
+carrierEndPostW = 8;
 carrierBaseRailW = 6;
 carrierMountFootW = 20;
 carrierMountFootD = 18;
@@ -137,7 +137,7 @@ carrierVentChamfer = 0.8;
 carrierVentChamferDepth = 0.7;
 topClampOuterCornerR = 4;
 topClampEdgeR = 2.5;
-topClampMountInsetX = 5.5;
+topClampMountInsetX = carrierSideMargin / 2;
 topClampMountInsetY = carrierMountInsetY;
 topClampPadW = hddT - 4;
 topClampPadD = carrierInsertD;
@@ -148,6 +148,7 @@ topClampPadPocketDepth = 1.2;
 topClampCableWindowW = min(topClampPadW - 3, hddConnectorKeepoutW);
 topClampCableWindowD = hddConnectorKeepoutD;
 topClampCableWindowY0 = hddConnectorKeepoutY0;
+topClampNutRoofT = 2.0;
 driveTopClampT = 4;
 
 fan120Frame = 120;
@@ -840,7 +841,7 @@ module driveCarrierBaseSocketSideScrewHole(p) {
 
 module driveCarrierTopClampNutPockets() {
   for (p = driveCarrierTopClampMountCenters()) {
-    translate(v=[p[0], p[1], hddL - hexNutThickness("m3")/2 - 0.7])
+    translate(v=[p[0], p[1], topClampNutPocketCenterZ()])
     hexNutPocket_N("m3", openSide=false, backSpace=8, bridgeBack=true);
   }
 }
@@ -1236,6 +1237,8 @@ function driveCarrierTopClampMountCenters() = [
   for (y = [topClampMountInsetY, carrierInsertD - topClampMountInsetY])
   [x, y]
 ];
+function topClampNutPocketCenterZ() =
+  hddL - topClampNutRoofT - (hexNutThickness("m3") + overhangSlack) / 2;
 function carrierSlotBoundaryX(i) =
   i == 0 ? carrierSideMargin :
   i == hddCount ? carrierSideMargin + hddBankW :
