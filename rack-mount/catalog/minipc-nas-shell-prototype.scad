@@ -781,7 +781,7 @@ module driveCarrierFaceVentSlots() {
         chamferedVerticalSlotThroughY(
           width=carrierFaceVentSlotW,
           height=carrierFaceVentSlotH,
-          depth=carrierRailT + 2,
+          depth=carrierRailT,
           chamfer=carrierVentChamfer,
           chamferDepth=carrierVentChamferDepth
         );
@@ -798,7 +798,7 @@ module driveCarrierSideTieVentSlots() {
         chamferedVerticalSlotThroughX(
           width=carrierSideVentSlotW,
           height=carrierSideVentSlotH,
-          depth=carrierEndPostW + 2,
+          depth=carrierEndPostW,
           chamfer=carrierVentChamfer,
           chamferDepth=carrierVentChamferDepth
         );
@@ -1334,15 +1334,22 @@ module verticalSlotThroughY(width, height, depth) {
 }
 
 module chamferedVerticalSlotThroughY(width, height, depth, chamfer, chamferDepth) {
-  verticalSlotThroughY(width=width, height=height, depth=depth);
+  verticalSlotThroughY(width=width, height=height, depth=depth + 2);
 
-  for (y = [-depth/2 + chamferDepth/2, depth/2 - chamferDepth/2]) {
-    translate(v=[0, y, 0])
-    verticalSlotThroughY(
-      width=width + 2*chamfer,
-      height=height + 2*chamfer,
-      depth=chamferDepth
-    );
+  hull() {
+    translate(v=[0, -depth/2 - 0.02, 0])
+    verticalSlotThroughY(width=width + 2*chamfer, height=height + 2*chamfer, depth=0.04);
+
+    translate(v=[0, -depth/2 + chamferDepth, 0])
+    verticalSlotThroughY(width=width, height=height, depth=0.04);
+  }
+
+  hull() {
+    translate(v=[0, depth/2 + 0.02, 0])
+    verticalSlotThroughY(width=width + 2*chamfer, height=height + 2*chamfer, depth=0.04);
+
+    translate(v=[0, depth/2 - chamferDepth, 0])
+    verticalSlotThroughY(width=width, height=height, depth=0.04);
   }
 }
 
@@ -1360,15 +1367,22 @@ module verticalSlotThroughX(width, height, depth) {
 }
 
 module chamferedVerticalSlotThroughX(width, height, depth, chamfer, chamferDepth) {
-  verticalSlotThroughX(width=width, height=height, depth=depth);
+  verticalSlotThroughX(width=width, height=height, depth=depth + 2);
 
-  for (x = [-depth/2 + chamferDepth/2, depth/2 - chamferDepth/2]) {
-    translate(v=[x, 0, 0])
-    verticalSlotThroughX(
-      width=width + 2*chamfer,
-      height=height + 2*chamfer,
-      depth=chamferDepth
-    );
+  hull() {
+    translate(v=[-depth/2 - 0.02, 0, 0])
+    verticalSlotThroughX(width=width + 2*chamfer, height=height + 2*chamfer, depth=0.04);
+
+    translate(v=[-depth/2 + chamferDepth, 0, 0])
+    verticalSlotThroughX(width=width, height=height, depth=0.04);
+  }
+
+  hull() {
+    translate(v=[depth/2 + 0.02, 0, 0])
+    verticalSlotThroughX(width=width + 2*chamfer, height=height + 2*chamfer, depth=0.04);
+
+    translate(v=[depth/2 - chamferDepth, 0, 0])
+    verticalSlotThroughX(width=width, height=height, depth=0.04);
   }
 }
 
