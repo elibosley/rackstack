@@ -136,13 +136,7 @@ topClampOuterCornerR = 4;
 topClampEdgeR = 2.5;
 topClampMountInsetX = carrierSideMargin / 2;
 topClampMountInsetY = carrierMountInsetY;
-topClampPadW = hddT - 4;
-topClampDampingPocketD = hddD - 18;
-topClampDampingPocketY0 = carrierRailT + carrierDriveGapY + 9;
 topClampPadPocketDepth = 1.2;
-topClampCableWindowW = min(topClampPadW - 6, 16);
-topClampCableWindowD = 44;
-topClampCableWindowY0 = carrierRailT + carrierDriveGapY + hddD/2 - topClampCableWindowD/2;
 topClampNutRoofT = 2.0;
 driveTopClampT = 4;
 topClampLegLipT = 4;
@@ -150,6 +144,20 @@ topClampLegLipH = 14;
 topClampLegLipR = 2;
 topClampLegScrewZ = 10;
 topClampLegScrewReach = tableLegD + topClampLegLipT + 2;
+topBraceDriveWindowW = hddT + 1.4;
+topBraceDriveWindowD = hddD + 1.4;
+topBraceDriveWindowR = 3;
+driveRetainerT = 4;
+driveRetainerD = 16;
+driveRetainerScrewEdge = 5;
+driveRetainerScrewSpan = hddSlotW + hddSlotGap;
+driveRetainerW = driveRetainerScrewSpan + 2*driveRetainerScrewEdge;
+driveRetainerR = 2;
+driveRetainerYFromRear = 22;
+driveRetainerYStagger = 22;
+driveRetainerDampingW = topBraceDriveWindowW - 4;
+driveRetainerDampingD = driveRetainerD - 4;
+topBraceRetainerNutCenterZ = (hexNutThickness("m3") + xySlack) / 2 - 0.05;
 
 fan120Frame = 120;
 fan120HoleSpacing = 105;
@@ -203,6 +211,10 @@ module nasShellPrototypeAssembly() {
   translate(v=[carrierInsertX0(), carrierInsertY0(), hddTopZ])
   color([0.26, 0.30, 0.30])
   nasShellDriveTopClamp();
+
+  translate(v=[carrierInsertX0(), carrierInsertY0(), hddTopZ])
+  color([0.18, 0.22, 0.22])
+  nasShellDriveRetainers();
 
   for (i = [0:hddCount - 1]) {
     %translate(v=[driveSlotX(i) - hddT/2, hddY0, hddZ0])
@@ -338,8 +350,8 @@ module nasShellDriveTopClamp() {
 
     topClampMountCutouts();
     topClampLegScrewCutouts();
-    topClampDampingPockets();
-    topClampCableWindows();
+    topBraceDriveAccessWindows();
+    topBraceRetainerNutPockets();
   }
 }
 
@@ -413,32 +425,74 @@ module topClampFrame() {
   );
 }
 
-module topClampDampingPockets() {
+module topBraceDriveAccessWindows() {
   for (i = [0:hddCount - 1]) {
-    translate(v=[carrierSlotX(i) - topClampPadW/2 + 2, topClampDampingPocketY0, -0.1])
-    roundedPlateXY(
-      width=topClampPadW - 4,
-      depth=topClampDampingPocketD,
-      height=topClampPadPocketDepth + 0.1,
-      r=1.2
+    translate(v=[
+      carrierSlotX(i),
+      topBraceDriveWindowY0() + topBraceDriveWindowD/2,
+      -1
+    ])
+    roundedWindowThroughZ(
+      width=topBraceDriveWindowW,
+      depth=topBraceDriveWindowD,
+      height=driveTopClampT + 2,
+      r=topBraceDriveWindowR
     );
   }
 }
 
-module topClampCableWindows() {
+module topBraceRetainerNutPockets() {
   for (i = [0:hddCount - 1]) {
-    translate(v=[
-      carrierSlotX(i),
-      topClampCableWindowY0 + topClampCableWindowD/2,
-      -1
-    ])
-    roundedWindowThroughZ(
-      width=topClampCableWindowW,
-      depth=topClampCableWindowD,
-      height=driveTopClampT + 2,
-      r=2
-    );
+    for (p = driveRetainerScrewCenters(i)) {
+      translate(v=[p[0], p[1], topBraceRetainerNutCenterZ])
+      hexNutPocket_N("m3", openSide=false, backSpace=driveTopClampT + 2);
+    }
   }
+}
+
+module nasShellDriveRetainers() {
+  for (i = [0:hddCount - 1]) {
+    translate(v=[driveRetainerX0(i), driveRetainerY0(i), 0])
+    nasShellDriveRetainer();
+  }
+}
+
+module nasShellDriveRetainer() {
+  difference() {
+    roundedPlateXY(
+      width=driveRetainerW,
+      depth=driveRetainerD,
+      height=driveRetainerT,
+      r=driveRetainerR
+    );
+
+    driveRetainerMountCutouts();
+    driveRetainerDampingPocket();
+  }
+}
+
+module driveRetainerMountCutouts() {
+  for (p = driveRetainerLocalScrewCenters()) {
+    translate(v=[p[0], p[1], -1])
+    cylinder(r=m3RadiusSlacked, h=driveRetainerT + 2, $fn=24);
+
+    translate(v=[p[0], p[1], driveRetainerT])
+    counterSunkHead_N("m3", screwExtension=driveRetainerT + 6, headExtension=2);
+  }
+}
+
+module driveRetainerDampingPocket() {
+  translate(v=[
+    driveRetainerW/2 - driveRetainerDampingW/2,
+    driveRetainerD/2 - driveRetainerDampingD/2,
+    -0.1
+  ])
+  roundedPlateXY(
+    width=driveRetainerDampingW,
+    depth=driveRetainerDampingD,
+    height=topClampPadPocketDepth + 0.1,
+    r=1.2
+  );
 }
 
 module nasShellPcBottomAdapter() {
@@ -1284,6 +1338,23 @@ function topClampLegLipX0() =
   -carrierInsertX0();
 function topClampLegLipW() =
   outerW;
+function topBraceDriveWindowY0() =
+  hddY0 - carrierInsertY0() - 0.7;
+function driveRetainerCenterY(i) =
+  hddY0 - carrierInsertY0() + hddD - driveRetainerYFromRear
+    - (i % 2) * driveRetainerYStagger;
+function driveRetainerX0(i) =
+  carrierSlotX(i) - driveRetainerW/2;
+function driveRetainerY0(i) =
+  driveRetainerCenterY(i) - driveRetainerD/2;
+function driveRetainerLocalScrewCenters() = [
+  [driveRetainerScrewEdge, driveRetainerD/2],
+  [driveRetainerW - driveRetainerScrewEdge, driveRetainerD/2]
+];
+function driveRetainerScrewCenters(i) = [
+  for (p = driveRetainerLocalScrewCenters())
+  [driveRetainerX0(i) + p[0], driveRetainerY0(i) + p[1]]
+];
 function topClampLegScrewGlobalZ() =
   hddTopZ + topClampLegScrewZ;
 function topClampNutPocketCenterZ() =
