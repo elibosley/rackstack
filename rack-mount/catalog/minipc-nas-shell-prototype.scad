@@ -107,13 +107,17 @@ carrierInsertW = hddBankW + 2*carrierSideMargin;
 carrierInsertD = hddD + 2*driveRailT + 2*carrierDriveGapY;
 carrierInsertH = hddL;
 carrierBaseH = 8;
+carrierEndPostW = 6;
+carrierBaseRailW = 6;
 carrierMountFootW = 20;
 carrierMountFootD = 18;
 carrierMountFootH = carrierBaseH;
+carrierMountInsetX = carrierEndPostW + connectorRectWidth/2;
+carrierMountInsetY = carrierRailT + connectorRectDepth/2 + 2;
+carrierSideScrewBossH = connectorBottomToScrew + m3CounterSunkHeadRadius + 0.8;
+carrierSideScrewBossD = 10;
 carrierMountScrewR = m3RadiusSlacked;
 carrierScrewStrapW = 18;
-carrierEndPostW = 6;
-carrierBaseRailW = 6;
 carrierRootRibW = 5;
 carrierRootRibH = 8;
 carrierSideTieH = 6;
@@ -126,10 +130,12 @@ carrierSideVentSlotW = 4;
 carrierSideVentSlotH = 20;
 carrierSideVentSlotPitchY = 14;
 carrierSideVentSlotPitchZ = 24;
+carrierVentChamfer = 0.8;
+carrierVentChamferDepth = 0.7;
 topClampOuterCornerR = 4;
 topClampEdgeR = 2.5;
 topClampMountInsetX = 5.5;
-topClampMountInsetY = carrierRailT + 4;
+topClampMountInsetY = carrierMountInsetY;
 topClampPadW = hddT - 4;
 topClampPadD = carrierInsertD;
 topClampPadY0 = 0;
@@ -292,6 +298,7 @@ module nasShellDriveSlotTest() {
     union() {
       driveCarrierRailChannels(height=testH);
       driveCarrierBaseRails();
+      driveCarrierSideScrewBosses();
     }
 
     driveCarrierVentCutouts();
@@ -634,6 +641,7 @@ module nasShellDriveSled() {
       driveCarrierLaneGuides();
       driveCarrierBaseRails();
       driveCarrierMountFeet();
+      driveCarrierSideScrewBosses();
     }
 
     driveCarrierVentCutouts();
@@ -715,6 +723,21 @@ module driveCarrierMountFeet() {
   }
 }
 
+module driveCarrierSideScrewBosses() {
+  for (p = carrierMountLocalCenters()) {
+    fromLeft = p[0] < carrierInsertW/2;
+    x0 = fromLeft ? 0 : carrierInsertW - carrierEndPostW;
+
+    translate(v=[x0, p[1] - carrierSideScrewBossD/2, 0])
+    roundedPlateXY(
+      width=carrierEndPostW,
+      depth=carrierSideScrewBossD,
+      height=carrierSideScrewBossH,
+      r=2
+    );
+  }
+}
+
 module driveCarrierVentCutouts() {
   driveCarrierFaceVentSlots();
   driveCarrierSideTieVentSlots();
@@ -725,10 +748,12 @@ module driveCarrierFaceVentSlots() {
     for (x = carrierAirflowSlotXs()) {
       for (z = [carrierBaseH + 14:carrierFaceVentSlotPitchZ:hddL - 14]) {
         translate(v=[x, y, z])
-        verticalSlotThroughY(
+        chamferedVerticalSlotThroughY(
           width=carrierFaceVentSlotW,
           height=carrierFaceVentSlotH,
-          depth=carrierRailT + 2
+          depth=carrierRailT + 2,
+          chamfer=carrierVentChamfer,
+          chamferDepth=carrierVentChamferDepth
         );
       }
     }
@@ -740,10 +765,12 @@ module driveCarrierSideTieVentSlots() {
     for (y = [carrierRailT + 14:carrierSideVentSlotPitchY:carrierInsertD - carrierRailT - 14]) {
       for (z = [carrierBaseH + 16:carrierSideVentSlotPitchZ:hddL - 16]) {
         translate(v=[x, y, z])
-        verticalSlotThroughX(
+        chamferedVerticalSlotThroughX(
           width=carrierSideVentSlotW,
           height=carrierSideVentSlotH,
-          depth=carrierEndPostW + 2
+          depth=carrierEndPostW + 2,
+          chamfer=carrierVentChamfer,
+          chamferDepth=carrierVentChamferDepth
         );
       }
     }
@@ -1215,17 +1242,17 @@ function cageMountCenters() = [
 ];
 
 function carrierMountCenters() = [
-  [carrierInsertX0() + 10, carrierInsertY0() + carrierMountFootD/2],
-  [carrierInsertX0() + carrierInsertW - 10, carrierInsertY0() + carrierMountFootD/2],
-  [carrierInsertX0() + 10, carrierInsertY0() + carrierInsertD - carrierMountFootD/2],
-  [carrierInsertX0() + carrierInsertW - 10, carrierInsertY0() + carrierInsertD - carrierMountFootD/2]
+  [carrierInsertX0() + carrierMountInsetX, carrierInsertY0() + carrierMountInsetY],
+  [carrierInsertX0() + carrierInsertW - carrierMountInsetX, carrierInsertY0() + carrierMountInsetY],
+  [carrierInsertX0() + carrierMountInsetX, carrierInsertY0() + carrierInsertD - carrierMountInsetY],
+  [carrierInsertX0() + carrierInsertW - carrierMountInsetX, carrierInsertY0() + carrierInsertD - carrierMountInsetY]
 ];
 
 function carrierMountLocalCenters() = [
-  [10, carrierMountFootD/2],
-  [carrierInsertW - 10, carrierMountFootD/2],
-  [10, carrierInsertD - carrierMountFootD/2],
-  [carrierInsertW - 10, carrierInsertD - carrierMountFootD/2]
+  [carrierMountInsetX, carrierMountInsetY],
+  [carrierInsertW - carrierMountInsetX, carrierMountInsetY],
+  [carrierMountInsetX, carrierInsertD - carrierMountInsetY],
+  [carrierInsertW - carrierMountInsetX, carrierInsertD - carrierMountInsetY]
 ];
 
 function fanScrewCenters() = [
@@ -1266,6 +1293,19 @@ module verticalSlotThroughY(width, height, depth) {
   }
 }
 
+module chamferedVerticalSlotThroughY(width, height, depth, chamfer, chamferDepth) {
+  verticalSlotThroughY(width=width, height=height, depth=depth);
+
+  for (y = [-depth/2 + chamferDepth/2, depth/2 - chamferDepth/2]) {
+    translate(v=[0, y, 0])
+    verticalSlotThroughY(
+      width=width + 2*chamfer,
+      height=height + 2*chamfer,
+      depth=chamferDepth
+    );
+  }
+}
+
 module verticalSlotThroughX(width, height, depth) {
   r = width/2;
   hull() {
@@ -1276,6 +1316,19 @@ module verticalSlotThroughX(width, height, depth) {
     translate(v=[0, 0, height/2 - r])
     rotate(a=[0, 90, 0])
     cylinder(r=r, h=depth, center=true, $fn=24);
+  }
+}
+
+module chamferedVerticalSlotThroughX(width, height, depth, chamfer, chamferDepth) {
+  verticalSlotThroughX(width=width, height=height, depth=depth);
+
+  for (x = [-depth/2 + chamferDepth/2, depth/2 - chamferDepth/2]) {
+    translate(v=[x, 0, 0])
+    verticalSlotThroughX(
+      width=width + 2*chamfer,
+      height=height + 2*chamfer,
+      depth=chamferDepth
+    );
   }
 }
 
