@@ -59,6 +59,8 @@ else:
 # For actual dimensions, please see profiles.scad.
 class BuildSizeConfig:
     NANO = 'nano'
+    MINI_PC_STACK = 'minipc-stack'
+    MINI_PC_STACK_TALL = 'minipc-stack-tall'
     MINI = 'mini'
     MICRO = 'micro'
     CUSTOM = 'custom'
@@ -123,7 +125,14 @@ def main():
     parser.add_argument(
         '-c',
         default=BuildSizeConfig.MICRO,
-        choices=[BuildSizeConfig.NANO, BuildSizeConfig.MINI, BuildSizeConfig.MICRO, BuildSizeConfig.CUSTOM],
+        choices=[
+            BuildSizeConfig.NANO,
+            BuildSizeConfig.MINI_PC_STACK,
+            BuildSizeConfig.MINI_PC_STACK_TALL,
+            BuildSizeConfig.MINI,
+            BuildSizeConfig.MICRO,
+            BuildSizeConfig.CUSTOM,
+        ],
         help='Build size config profile. This will determine the size of the rack you wish to generate. '
              'For actual dimensions, please see rackFrame.scad.'
     )

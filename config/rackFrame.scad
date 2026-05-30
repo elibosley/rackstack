@@ -28,6 +28,20 @@ _profileConfigs = [
       ["maxUnitDepth", 105],
       ["numRailScrews", 10]
     ]],
+    ["minipc-stack", [
+      // Fits the 126x134 mm units rotated to 134 mm wide x 126 mm deep,
+      // with clearance for enclosed-box mini PC mounts.
+      ["maxUnitWidth", 145],
+      ["maxUnitDepth", 132],
+      ["numRailScrews", 10]
+    ]],
+    ["minipc-stack-tall", [
+      // Taller version of minipc-stack for holding multiple mini PC mounts
+      // in one rack frame.
+      ["maxUnitWidth", 145],
+      ["maxUnitDepth", 132],
+      ["numRailScrews", 20]
+    ]],
     ["micro", [
       ["maxUnitWidth", 180],
       ["maxUnitDepth", 180],

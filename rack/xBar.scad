@@ -45,3 +45,16 @@ module xBar() {
   }
 
 }
+
+module xBarFan120Cutout() {
+  fanOpeningR = 57;
+  fanCenterX = rackTotalDepth/2;
+  fanCenterY = xBarX/2;
+
+  difference() {
+    xBar();
+
+    translate(v=[fanCenterX, fanCenterY, -1])
+    cylinder(r=fanOpeningR, h=xBarHeight+2, $fn=96);
+  }
+}
