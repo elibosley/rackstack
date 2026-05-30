@@ -137,8 +137,6 @@ topClampEdgeR = 2.5;
 topClampMountInsetX = carrierSideMargin / 2;
 topClampMountInsetY = carrierMountInsetY;
 topClampPadW = hddT - 4;
-topClampPadD = carrierInsertD;
-topClampPadY0 = 0;
 topClampDampingPocketD = hddD - 18;
 topClampDampingPocketY0 = carrierRailT + carrierDriveGapY + 9;
 topClampPadPocketDepth = 1.2;
@@ -336,10 +334,6 @@ module nasShellDriveTopClamp() {
     union() {
       topClampFrame();
       topClampLegLips();
-
-      for (i = [0:hddCount - 1]) {
-        topClampDrivePad(i);
-      }
     }
 
     topClampMountCutouts();
@@ -427,21 +421,7 @@ module m3FhcsThroughY(x, headY, z, direction, length) {
 
 module topClampFrame() {
   translate(v=[0, 0, 0])
-  roundedPlateXY(width=carrierInsertW, depth=carrierRailT + 2, height=driveTopClampT, r=topClampEdgeR);
-
-  translate(v=[0, carrierInsertD - carrierRailT - 2, 0])
-  roundedPlateXY(width=carrierInsertW, depth=carrierRailT + 2, height=driveTopClampT, r=topClampEdgeR);
-
-  translate(v=[0, 0, 0])
-  roundedPlateXY(width=carrierEndPostW, depth=carrierInsertD, height=driveTopClampT, r=topClampEdgeR);
-
-  translate(v=[carrierInsertW - carrierEndPostW, 0, 0])
-  roundedPlateXY(width=carrierEndPostW, depth=carrierInsertD, height=driveTopClampT, r=topClampEdgeR);
-}
-
-module topClampDrivePad(i) {
-  translate(v=[carrierSlotX(i) - topClampPadW/2, topClampPadY0, 0])
-  roundedPlateXY(width=topClampPadW, depth=topClampPadD, height=driveTopClampT, r=topClampEdgeR);
+  roundedPlateXY(width=carrierInsertW, depth=carrierInsertD, height=driveTopClampT, r=topClampEdgeR);
 }
 
 module topClampDampingPockets() {
