@@ -147,10 +147,11 @@ topClampCableWindowD = 44;
 topClampCableWindowY0 = carrierRailT + carrierDriveGapY + hddD/2 - topClampCableWindowD/2;
 topClampNutRoofT = 2.0;
 driveTopClampT = 4;
-topClampLegBossW = tableLegW;
-topClampLegBossD = 18;
-topClampLegBossH = 14;
+topClampLegLipT = 4;
+topClampLegLipH = 14;
+topClampLegLipR = 2;
 topClampLegScrewZ = 10;
+topClampLegScrewReach = tableLegD + topClampLegLipT + 2;
 
 fan120Frame = 120;
 fan120HoleSpacing = 105;
@@ -334,7 +335,7 @@ module nasShellDriveTopClamp() {
   difference() {
     union() {
       topClampFrame();
-      topClampLegBosses();
+      topClampLegLips();
 
       for (i = [0:hddCount - 1]) {
         topClampDrivePad(i);
@@ -364,35 +365,45 @@ module topClampMountCutouts() {
   }
 }
 
-module topClampLegBosses() {
-  for (p = topClampLegScrewLocalCenters()) {
-    translate(v=[
-      p[0] - topClampLegBossW/2,
-      p[1] < carrierInsertD/2
-        ? tableLegD - carrierInsertY0()
-        : outerD - tableLegD - topClampLegBossD - carrierInsertY0(),
-      0
-    ])
+module topClampLegLips() {
+  translate(v=[topClampLegLipX0(), topClampFrontLipY0(), 0])
+  roundedPanelXz(
+    width=topClampLegLipW(),
+    thickness=topClampLegLipT,
+    height=topClampLegLipH,
+    r=topClampLegLipR
+  );
+
+  if (topClampRearBridgeD() > 0) {
+    translate(v=[topClampLegLipX0(), topClampRearBridgeY0(), 0])
     roundedPlateXY(
-      width=topClampLegBossW,
-      depth=topClampLegBossD,
-      height=topClampLegBossH,
-      r=3
+      width=topClampLegLipW(),
+      depth=topClampRearBridgeD(),
+      height=driveTopClampT,
+      r=topClampEdgeR
     );
   }
+
+  translate(v=[topClampLegLipX0(), topClampRearLipY0(), 0])
+  roundedPanelXz(
+    width=topClampLegLipW(),
+    thickness=topClampLegLipT,
+    height=topClampLegLipH,
+    r=topClampLegLipR
+  );
 }
 
 module topClampLegScrewCutouts() {
   for (p = topClampFrontLegScrewLocalCenters()) {
-    translate(v=[p[0], tableLegD + topClampLegBossD - carrierInsertY0(), topClampLegScrewZ])
+    translate(v=[p[0], topClampFrontLipY0() + topClampLegLipT, topClampLegScrewZ])
     rotate(a=[90, 0, 0])
-    counterSunkHead_N("m3", screwExtension=topClampLegBossD + 2, headExtension=2);
+    counterSunkHead_N("m3", screwExtension=topClampLegScrewReach, headExtension=2);
   }
 
   for (p = topClampRearLegScrewLocalCenters()) {
-    translate(v=[p[0], outerD - tableLegD - topClampLegBossD - carrierInsertY0(), topClampLegScrewZ])
+    translate(v=[p[0], topClampRearLipY0(), topClampLegScrewZ])
     rotate(a=[-90, 0, 0])
-    counterSunkHead_N("m3", screwExtension=topClampLegBossD + 2, headExtension=2);
+    counterSunkHead_N("m3", screwExtension=topClampLegScrewReach, headExtension=2);
   }
 }
 
@@ -1262,14 +1273,26 @@ function driveCarrierTopClampMountCenters() = [
 ];
 function topClampFrontLegScrewLocalCenters() = [
   for (x = [tableLegW/2, outerW - tableLegW/2])
-  [x - carrierInsertX0(), tableLegD + topClampLegBossD/2 - carrierInsertY0()]
+  [x - carrierInsertX0(), topClampFrontLipY0() + topClampLegLipT]
 ];
 function topClampRearLegScrewLocalCenters() = [
   for (x = [tableLegW/2, outerW - tableLegW/2])
-  [x - carrierInsertX0(), outerD - tableLegD - topClampLegBossD/2 - carrierInsertY0()]
+  [x - carrierInsertX0(), topClampRearLipY0()]
 ];
 function topClampLegScrewLocalCenters() =
   concat(topClampFrontLegScrewLocalCenters(), topClampRearLegScrewLocalCenters());
+function topClampFrontLipY0() =
+  max(0, tableLegD - carrierInsertY0());
+function topClampRearLipY0() =
+  outerD - tableLegD - topClampLegLipT - carrierInsertY0();
+function topClampRearBridgeY0() =
+  carrierInsertD - 0.5;
+function topClampRearBridgeD() =
+  topClampRearLipY0() + topClampLegLipT - topClampRearBridgeY0();
+function topClampLegLipX0() =
+  -carrierInsertX0();
+function topClampLegLipW() =
+  outerW;
 function topClampLegScrewGlobalZ() =
   hddTopZ + topClampLegScrewZ;
 function topClampNutPocketCenterZ() =
