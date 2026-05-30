@@ -395,16 +395,34 @@ module topClampLegLips() {
 
 module topClampLegScrewCutouts() {
   for (p = topClampFrontLegScrewLocalCenters()) {
-    translate(v=[p[0], topClampFrontLipY0() + topClampLegLipT, topClampLegScrewZ])
-    rotate(a=[90, 0, 0])
-    counterSunkHead_N("m3", screwExtension=topClampLegScrewReach, headExtension=2);
+    m3FhcsThroughY(
+      x=p[0],
+      headY=topClampFrontLipY0() + topClampLegLipT,
+      z=topClampLegScrewZ,
+      direction=-1,
+      length=topClampLegScrewReach
+    );
   }
 
   for (p = topClampRearLegScrewLocalCenters()) {
-    translate(v=[p[0], topClampRearLipY0(), topClampLegScrewZ])
-    rotate(a=[-90, 0, 0])
-    counterSunkHead_N("m3", screwExtension=topClampLegScrewReach, headExtension=2);
+    m3FhcsThroughY(
+      x=p[0],
+      headY=topClampRearLipY0(),
+      z=topClampLegScrewZ,
+      direction=1,
+      length=topClampLegScrewReach
+    );
   }
+}
+
+module m3FhcsThroughY(x, headY, z, direction, length) {
+  translate(v=[x, headY + direction*length/2, z])
+  rotate(a=[90, 0, 0])
+  cylinder(r=m3RadiusSlacked, h=length + 2, center=true, $fn=32);
+
+  translate(v=[x, headY, z])
+  rotate(a=direction < 0 ? [-90, 0, 0] : [90, 0, 0])
+  counterSunkHead_N("m3", screwExtension=length + 2, headExtension=2);
 }
 
 module topClampFrame() {
