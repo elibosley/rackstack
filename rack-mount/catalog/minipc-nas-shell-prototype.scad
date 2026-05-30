@@ -117,6 +117,8 @@ carrierBaseH = 8;
 carrierRootRibW = 5;
 carrierRootRibH = 8;
 carrierSideTieH = 6;
+carrierOuterCornerR = 4;
+carrierPanelEdgeR = 2.5;
 carrierFaceVentSlotW = hddSlotGap + driveBayClearX - 1.5;
 carrierFaceVentSlotH = 22;
 carrierFaceVentSlotPitchZ = 24;
@@ -124,6 +126,8 @@ carrierSideVentSlotW = 4;
 carrierSideVentSlotH = 20;
 carrierSideVentSlotPitchY = 14;
 carrierSideVentSlotPitchZ = 24;
+topClampOuterCornerR = 4;
+topClampEdgeR = 2.5;
 topClampMountInsetX = carrierEndPostW/2;
 topClampMountInsetY = carrierRailT + 4;
 topClampPadW = hddT - 4;
@@ -292,6 +296,7 @@ module nasShellDriveSlotTest() {
 
     driveCarrierVentCutouts();
     driveCarrierNutPockets();
+    driveCarrierOuterCornerCutouts(height=testH);
   }
 }
 
@@ -326,6 +331,12 @@ module nasShellDriveTopClamp() {
     topClampMountCutouts();
     topClampDampingPockets();
     topClampCableWindows();
+    roundedRectOutsideCornerCutouts(
+      width=carrierInsertW,
+      depth=carrierInsertD,
+      height=driveTopClampT + 2,
+      r=topClampOuterCornerR
+    );
   }
 }
 
@@ -341,21 +352,21 @@ module topClampMountCutouts() {
 
 module topClampFrame() {
   translate(v=[0, 0, 0])
-  roundedPlateXY(width=carrierInsertW, depth=carrierRailT + 2, height=driveTopClampT, r=1.5);
+  roundedPlateXY(width=carrierInsertW, depth=carrierRailT + 2, height=driveTopClampT, r=topClampEdgeR);
 
   translate(v=[0, carrierInsertD - carrierRailT - 2, 0])
-  roundedPlateXY(width=carrierInsertW, depth=carrierRailT + 2, height=driveTopClampT, r=1.5);
+  roundedPlateXY(width=carrierInsertW, depth=carrierRailT + 2, height=driveTopClampT, r=topClampEdgeR);
 
   translate(v=[0, 0, 0])
-  roundedPlateXY(width=carrierEndPostW, depth=carrierInsertD, height=driveTopClampT, r=1.5);
+  roundedPlateXY(width=carrierEndPostW, depth=carrierInsertD, height=driveTopClampT, r=topClampEdgeR);
 
   translate(v=[carrierInsertW - carrierEndPostW, 0, 0])
-  roundedPlateXY(width=carrierEndPostW, depth=carrierInsertD, height=driveTopClampT, r=1.5);
+  roundedPlateXY(width=carrierEndPostW, depth=carrierInsertD, height=driveTopClampT, r=topClampEdgeR);
 }
 
 module topClampDrivePad(i) {
   translate(v=[carrierSlotX(i) - topClampPadW/2, topClampPadY0, 0])
-  roundedPlateXY(width=topClampPadW, depth=topClampPadD, height=driveTopClampT, r=1.5);
+  roundedPlateXY(width=topClampPadW, depth=topClampPadD, height=driveTopClampT, r=topClampEdgeR);
 }
 
 module topClampDampingPockets() {
@@ -628,6 +639,7 @@ module nasShellDriveSled() {
     driveCarrierVentCutouts();
     driveCarrierNutPockets();
     driveCarrierTopClampNutPockets();
+    driveCarrierOuterCornerCutouts(height=hddL);
   }
 }
 
@@ -659,7 +671,7 @@ module driveCarrierSlottedRailPlate(y, height) {
 
   difference() {
     translate(v=[0, y, 0])
-    roundedPanelXz(width=carrierInsertW, thickness=carrierRailT, height=height, r=1.5);
+    roundedPanelXz(width=carrierInsertW, thickness=carrierRailT, height=height, r=carrierPanelEdgeR);
 
     for (i = [0:hddCount - 1]) {
       translate(v=[carrierSlotX(i) - channelW/2, channelY, carrierBaseH])
@@ -671,7 +683,7 @@ module driveCarrierSlottedRailPlate(y, height) {
 module driveCarrierSideTies(height) {
   for (x = [0, carrierInsertW - carrierEndPostW]) {
     translate(v=[x, 0, 0])
-    roundedPanelYz(thickness=carrierEndPostW, depth=carrierInsertD, height=height, r=1.5);
+    roundedPanelYz(thickness=carrierEndPostW, depth=carrierInsertD, height=height, r=carrierPanelEdgeR);
   }
 }
 
@@ -736,6 +748,15 @@ module driveCarrierSideTieVentSlots() {
       }
     }
   }
+}
+
+module driveCarrierOuterCornerCutouts(height) {
+  roundedRectOutsideCornerCutouts(
+    width=carrierInsertW,
+    depth=carrierInsertD,
+    height=height + 2,
+    r=carrierOuterCornerR
+  );
 }
 
 module driveCarrierHddScrewSlots() {
@@ -1284,6 +1305,57 @@ module roundedPlateXY(width, depth, height, r) {
 
     translate(v=[width - safeR, depth - safeR, 0])
     cylinder(r=safeR, h=height, $fn=32);
+  }
+}
+
+module roundedRectOutsideCornerCutouts(width, depth, height, r) {
+  safeR = min(r, min(width, depth)/2 - eps);
+
+  cornerRoundCutout(
+    x0=0,
+    y0=0,
+    cx=safeR,
+    cy=safeR,
+    height=height,
+    r=safeR
+  );
+
+  cornerRoundCutout(
+    x0=width - safeR,
+    y0=0,
+    cx=width - safeR,
+    cy=safeR,
+    height=height,
+    r=safeR
+  );
+
+  cornerRoundCutout(
+    x0=0,
+    y0=depth - safeR,
+    cx=safeR,
+    cy=depth - safeR,
+    height=height,
+    r=safeR
+  );
+
+  cornerRoundCutout(
+    x0=width - safeR,
+    y0=depth - safeR,
+    cx=width - safeR,
+    cy=depth - safeR,
+    height=height,
+    r=safeR
+  );
+}
+
+module cornerRoundCutout(x0, y0, cx, cy, height, r) {
+  translate(v=[0, 0, -1])
+  difference() {
+    translate(v=[x0 - eps, y0 - eps, 0])
+    cube(size=[r + 2*eps, r + 2*eps, height]);
+
+    translate(v=[cx, cy, -1])
+    cylinder(r=r, h=height + 2, $fn=48);
   }
 }
 
