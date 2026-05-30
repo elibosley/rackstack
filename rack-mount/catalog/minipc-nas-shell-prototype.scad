@@ -121,9 +121,6 @@ carrierScrewStrapW = 18;
 carrierRootRibW = 5;
 carrierRootRibH = 8;
 carrierSideTieH = 6;
-carrierRearLegTieW = 12;
-carrierRearLegTieH = carrierBaseH;
-carrierRearLegTieOverlap = 1.5;
 carrierOuterCornerR = 4;
 carrierPanelEdgeR = 2.5;
 carrierFaceVentSlotW = hddSlotGap + driveBayClearX - 1.5;
@@ -145,11 +142,15 @@ topClampPadY0 = 0;
 topClampDampingPocketD = hddD - 18;
 topClampDampingPocketY0 = carrierRailT + carrierDriveGapY + 9;
 topClampPadPocketDepth = 1.2;
-topClampCableWindowW = min(topClampPadW - 3, hddConnectorKeepoutW);
-topClampCableWindowD = hddConnectorKeepoutD;
-topClampCableWindowY0 = hddConnectorKeepoutY0;
+topClampCableWindowW = min(topClampPadW - 6, 16);
+topClampCableWindowD = 44;
+topClampCableWindowY0 = carrierRailT + carrierDriveGapY + hddD/2 - topClampCableWindowD/2;
 topClampNutRoofT = 2.0;
 driveTopClampT = 4;
+topClampLegBossW = tableLegW;
+topClampLegBossD = 18;
+topClampLegBossH = 14;
+topClampLegScrewZ = 10;
 
 fan120Frame = 120;
 fan120HoleSpacing = 105;
@@ -333,6 +334,7 @@ module nasShellDriveTopClamp() {
   difference() {
     union() {
       topClampFrame();
+      topClampLegBosses();
 
       for (i = [0:hddCount - 1]) {
         topClampDrivePad(i);
@@ -340,6 +342,7 @@ module nasShellDriveTopClamp() {
     }
 
     topClampMountCutouts();
+    topClampLegScrewCutouts();
     topClampDampingPockets();
     topClampCableWindows();
     roundedRectOutsideCornerCutouts(
@@ -358,6 +361,38 @@ module topClampMountCutouts() {
 
     translate(v=[p[0], p[1], driveTopClampT])
     counterSunkHead_N("m3", screwExtension=driveTopClampT + 6, headExtension=2);
+  }
+}
+
+module topClampLegBosses() {
+  for (p = topClampLegScrewLocalCenters()) {
+    translate(v=[
+      p[0] - topClampLegBossW/2,
+      p[1] < carrierInsertD/2
+        ? tableLegD - carrierInsertY0()
+        : outerD - tableLegD - topClampLegBossD - carrierInsertY0(),
+      0
+    ])
+    roundedPlateXY(
+      width=topClampLegBossW,
+      depth=topClampLegBossD,
+      height=topClampLegBossH,
+      r=3
+    );
+  }
+}
+
+module topClampLegScrewCutouts() {
+  for (p = topClampFrontLegScrewLocalCenters()) {
+    translate(v=[p[0], tableLegD + topClampLegBossD - carrierInsertY0(), topClampLegScrewZ])
+    rotate(a=[90, 0, 0])
+    counterSunkHead_N("m3", screwExtension=topClampLegBossD + 2, headExtension=2);
+  }
+
+  for (p = topClampRearLegScrewLocalCenters()) {
+    translate(v=[p[0], outerD - tableLegD - topClampLegBossD - carrierInsertY0(), topClampLegScrewZ])
+    rotate(a=[-90, 0, 0])
+    counterSunkHead_N("m3", screwExtension=topClampLegBossD + 2, headExtension=2);
   }
 }
 
@@ -501,6 +536,11 @@ module nasShellTableLeg(x0, y0) {
         openTowardCenterX=fromLeft
       );
     }
+
+    m3FrontBackPanelNutPocket(
+      center=[tableLegW/2, tableLegD/2, topClampLegScrewGlobalZ() - baseT],
+      openTowardCenterX=fromLeft
+    );
 
     for (z = sidePanelMountZs) {
       m3SidePanelNutPocket(
@@ -653,7 +693,6 @@ module nasShellDriveSled() {
       driveCarrierPanels();
       driveCarrierLaneGuides();
       driveCarrierBaseRails();
-      driveCarrierRearLegTies();
       driveCarrierMountFeet();
       driveCarrierSideScrewBosses();
     }
@@ -727,22 +766,6 @@ module driveCarrierBaseRails() {
   for (i = [0:hddCount - 1]) {
     translate(v=[carrierSlotX(i) - carrierRootRibW/2, 0, 0])
     roundedPlateXY(width=carrierRootRibW, depth=carrierInsertD, height=carrierRootRibH, r=1.5);
-  }
-}
-
-module driveCarrierRearLegTies() {
-  tieD = carrierRearLegTieDepth();
-
-  if (tieD > 0) {
-    for (x = carrierRearLegTieXs()) {
-      translate(v=[x, carrierInsertD - carrierRearLegTieOverlap, 0])
-      roundedPlateXY(
-        width=carrierRearLegTieW,
-        depth=tieD,
-        height=carrierRearLegTieH,
-        r=2
-      );
-    }
   }
 }
 
@@ -1237,6 +1260,18 @@ function driveCarrierTopClampMountCenters() = [
   for (y = [topClampMountInsetY, carrierInsertD - topClampMountInsetY])
   [x, y]
 ];
+function topClampFrontLegScrewLocalCenters() = [
+  for (x = [tableLegW/2, outerW - tableLegW/2])
+  [x - carrierInsertX0(), tableLegD + topClampLegBossD/2 - carrierInsertY0()]
+];
+function topClampRearLegScrewLocalCenters() = [
+  for (x = [tableLegW/2, outerW - tableLegW/2])
+  [x - carrierInsertX0(), outerD - tableLegD - topClampLegBossD/2 - carrierInsertY0()]
+];
+function topClampLegScrewLocalCenters() =
+  concat(topClampFrontLegScrewLocalCenters(), topClampRearLegScrewLocalCenters());
+function topClampLegScrewGlobalZ() =
+  hddTopZ + topClampLegScrewZ;
 function topClampNutPocketCenterZ() =
   hddL - topClampNutRoofT - (hexNutThickness("m3") + overhangSlack) / 2;
 function carrierSlotBoundaryX(i) =
@@ -1286,14 +1321,6 @@ function carrierMountLocalCenters() = [
   [carrierMountInsetX, carrierInsertD - carrierMountInsetY],
   [carrierInsertW - carrierMountInsetX, carrierInsertD - carrierMountInsetY]
 ];
-
-function carrierRearLegTieXs() = [
-  tableLegW - carrierInsertX0(),
-  outerW - tableLegW - carrierInsertX0() - carrierRearLegTieW
-];
-
-function carrierRearLegTieDepth() =
-  max(0, outerD - tableLegD - carrierInsertY0() - carrierInsertD + carrierRearLegTieOverlap);
 
 function fanScrewCenters() = [
   [fanCenterX - fan120HoleSpacing/2, fanCenterZ - fan120HoleSpacing/2],
