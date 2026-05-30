@@ -340,12 +340,6 @@ module nasShellDriveTopClamp() {
     topClampLegScrewCutouts();
     topClampDampingPockets();
     topClampCableWindows();
-    roundedRectOutsideCornerCutouts(
-      width=carrierInsertW,
-      depth=carrierInsertD,
-      height=driveTopClampT + 2,
-      r=topClampOuterCornerR
-    );
   }
 }
 
@@ -367,16 +361,6 @@ module topClampLegLips() {
     height=topClampLegLipH,
     r=topClampLegLipR
   );
-
-  if (topClampRearBridgeD() > 0) {
-    translate(v=[topClampLegLipX0(), topClampRearBridgeY0(), 0])
-    roundedPlateXY(
-      width=topClampLegLipW(),
-      depth=topClampRearBridgeD(),
-      height=driveTopClampT,
-      r=topClampEdgeR
-    );
-  }
 
   translate(v=[topClampLegLipX0(), topClampRearLipY0(), 0])
   roundedPanelXz(
@@ -420,8 +404,13 @@ module m3FhcsThroughY(x, headY, z, direction, length) {
 }
 
 module topClampFrame() {
-  translate(v=[0, 0, 0])
-  roundedPlateXY(width=carrierInsertW, depth=carrierInsertD, height=driveTopClampT, r=topClampEdgeR);
+  translate(v=[topClampPlateX0(), topClampPlateY0(), 0])
+  roundedPlateXY(
+    width=topClampPlateW(),
+    depth=topClampPlateD(),
+    height=driveTopClampT,
+    r=topClampOuterCornerR
+  );
 }
 
 module topClampDampingPockets() {
@@ -1283,10 +1272,14 @@ function topClampFrontLipY0() =
   max(0, tableLegD - carrierInsertY0());
 function topClampRearLipY0() =
   outerD - tableLegD - topClampLegLipT - carrierInsertY0();
-function topClampRearBridgeY0() =
-  carrierInsertD - 0.5;
-function topClampRearBridgeD() =
-  topClampRearLipY0() + topClampLegLipT - topClampRearBridgeY0();
+function topClampPlateX0() =
+  -carrierInsertX0();
+function topClampPlateY0() =
+  topClampFrontLipY0();
+function topClampPlateW() =
+  outerW;
+function topClampPlateD() =
+  topClampRearLipY0() + topClampLegLipT - topClampPlateY0();
 function topClampLegLipX0() =
   -carrierInsertX0();
 function topClampLegLipW() =
